@@ -150,7 +150,7 @@ int part1() {
 void calculateOutput(long long& seed, const vector<long long>& map_numbers) {
   for (int i = 0; i < map_numbers.size(); i += 3) {
     if (seed >= map_numbers[i + 1] &&
-        seed <= map_numbers[i + 1] + map_numbers[i + 2]) {
+        seed < map_numbers[i + 1] + map_numbers[i + 2]) {
       seed = map_numbers[i] + (seed - map_numbers[i + 1]);
       break;
     }
@@ -159,7 +159,6 @@ void calculateOutput(long long& seed, const vector<long long>& map_numbers) {
 long long part2() {
   std::stringstream buffer;
   read_from_file("/home/mateusz/AdventOfCode2023/Day05/input.txt", buffer);
-  // vector<long long> pre_seeds_numbers;
   vector<long long> seeds_numbers;
   vector<long long> vseedToSoil;
   vector<long long> vsoilToFertilizer;
@@ -247,6 +246,6 @@ long long part2() {
   return smallest;
 }
 int main() {
-  cout << part1() << endl;
+  // cout << part1() << endl;
   cout << part2() << endl;
 }

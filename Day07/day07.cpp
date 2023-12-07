@@ -19,14 +19,17 @@ void read_from_file(const string& filename, stringstream& buffer) {
 class CamelCards {
  private:
   map<char, int8_t> mapper = {
-      {'2', 2}, {'3', 3},  {'4', 4},  {'5', 5},  {'6', 6},  {'7', 7}, {'8', 8},
-      {'9', 9}, {'T', 10}, {'J', 11}, {'Q', 12}, {'K', 13}, {'A', 14}};
+      {'J', 1}, {'2', 2}, {'3', 3},  {'4', 4},  {'5', 5},  {'6', 6}, {'7', 7},
+      {'8', 8}, {'9', 9}, {'T', 10}, {'Q', 12}, {'K', 13}, {'A', 14}};
   string card_string;
   vector<char> cards;
   int32_t bid;
   map<char, int8_t> occurance_map;
+  map<char, int8_t> copy_occurance_map;
+
   int8_t points;
   int32_t rank;
+  int8_t jokers;
 
  public:
   CamelCards(string& cards_string, const int32_t& bid_value)
@@ -36,12 +39,13 @@ class CamelCards {
       cards.emplace_back(c);
     }
     calculateOccurence();
+    countJokers();
 
     if (checkForNumOfOccurance(5)) {
       points = 7;
     } else if (checkForNumOfOccurance(4)) {
       points = 6;
-    } else if (checkForNumOfOccurance(2, 3)) {
+    } else if (checkForNumOfOccurance(3, 2)) {
       points = 5;
     } else if (checkForNumOfOccurance(3)) {
       points = 4;
@@ -59,36 +63,70 @@ class CamelCards {
       occurance_map[c]++;
     }
   }
+
+  void countJokers() { 
+    copy_occurance_map = occurance_map;
+    jokers = occurance_map['J'];
+    occurance_map.erase('J');
+     }
+
   bool checkForNumOfOccurance(int8_t how_many_occursion) const {
+  int8_t max = 0;
     for (auto const& x : occurance_map) {
       if (x.second == how_many_occursion) {
         return true;
       }
+      else if(x.second > max){
+        max = x.second;
+      }
     }
-    return false;
+    return max + jokers >= how_many_occursion;
   }
   bool checkForNumOfOccurance(int8_t how_many_occursion,
                               int8_t how_many_occursion2) const {
     bool first = false;
     map<char, int8_t> occurance_map_copy = occurance_map;
+    int8_t jokers_copy = jokers;
+    int8_t max = 0;
+    char max_key;
     for (auto& x : occurance_map_copy) {
       if (x.second == how_many_occursion) {
         first = true;
         occurance_map_copy.erase(x.first);
         break;
       }
+      else if(x.second>max){
+        max = x.second;
+        max_key = x.first;
+      }
     }
-
+    if(first){
+      max = 0;
+    }
+    else {
+      if(max+jokers_copy >=how_many_occursion){
+        first = true;
+        occurance_map_copy.erase(max_key);
+        jokers_copy -= how_many_occursion - max;
+        max = 0;
+      }
+      else{
+        return false;
+      }
+    }
     for (auto& x : occurance_map_copy) {
       if (x.second == how_many_occursion2) {
         return first;
       }
+      else if(x.second>max){
+        max = x.second;
+      }
     }
-    return false;
+    return max + jokers_copy >= how_many_occursion2;
   }
   bool checkForHighCard() {
     for (auto const& x : occurance_map) {
-      if (x.second != 1) {
+      if (x.second != 1 && x.first!='J') {
         return false;
       }
     }
@@ -120,18 +158,37 @@ int part1() {
     vec.push_back(CamelCards(cards, stoi(bid)));
   }
   sort(vec.begin(), vec.end(), cmp);
-  for(int i =0; i<vec.size(); ++i){
-    vec[i].setRank(i+1);
+  for (int i = 0; i < vec.size(); ++i) {
+    vec[i].setRank(i + 1);
   }
   long long anwser = 0;
-  for(int i =0; i<vec.size(); ++i){
+  for (int i = 0; i < vec.size(); ++i) {
     anwser += vec[i].getBid() * vec[i].getRank();
   }
 
   return anwser;
 }
 
+int part2() {
+  std::stringstream buffer;
+  read_from_file("/home/mateusz/AdventOfCode2023/Day07/input.txt", buffer);
+  string cards, bid;
+  vector<CamelCards> vec;
+  while (buffer >> cards >> bid) {
+    vec.push_back(CamelCards(cards, stoi(bid)));
+  }
+  sort(vec.begin(), vec.end(), cmp);
+  for (int i = 0; i < vec.size(); ++i) {
+    vec[i].setRank(i + 1);
+  }
+  long long anwser = 0;
+  for (int i = 0; i < vec.size(); ++i) {
+    anwser += vec[i].getBid() * vec[i].getRank();
+  }
+
+  return anwser;
+}
 int main() {
-  cout << part1() << endl;
-  // cout << part2() << endl;
+  // cout << part1() << endl;
+  cout << part2() << endl;
 }

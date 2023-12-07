@@ -64,19 +64,18 @@ class CamelCards {
     }
   }
 
-  void countJokers() { 
+  void countJokers() {
     copy_occurance_map = occurance_map;
     jokers = occurance_map['J'];
     occurance_map.erase('J');
-     }
+  }
 
   bool checkForNumOfOccurance(int8_t how_many_occursion) const {
-  int8_t max = 0;
+    int8_t max = 0;
     for (auto const& x : occurance_map) {
       if (x.second == how_many_occursion) {
         return true;
-      }
-      else if(x.second > max){
+      } else if (x.second > max) {
         max = x.second;
       }
     }
@@ -94,31 +93,27 @@ class CamelCards {
         first = true;
         occurance_map_copy.erase(x.first);
         break;
-      }
-      else if(x.second>max){
+      } else if (x.second > max) {
         max = x.second;
         max_key = x.first;
       }
     }
-    if(first){
+    if (first) {
       max = 0;
-    }
-    else {
-      if(max+jokers_copy >=how_many_occursion){
+    } else {
+      if (max + jokers_copy >= how_many_occursion) {
         first = true;
         occurance_map_copy.erase(max_key);
         jokers_copy -= how_many_occursion - max;
         max = 0;
-      }
-      else{
+      } else {
         return false;
       }
     }
     for (auto& x : occurance_map_copy) {
       if (x.second == how_many_occursion2) {
         return first;
-      }
-      else if(x.second>max){
+      } else if (x.second > max) {
         max = x.second;
       }
     }
@@ -126,7 +121,7 @@ class CamelCards {
   }
   bool checkForHighCard() {
     for (auto const& x : occurance_map) {
-      if (x.second != 1 && x.first!='J') {
+      if (x.second != 1 && x.first != 'J') {
         return false;
       }
     }

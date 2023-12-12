@@ -1,8 +1,8 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <map>
 #include <numeric>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -32,66 +32,85 @@ void read_elements(vector<vector<char>>& all_numbers) {
   }
 }
 
-bool are_all_dots(const vector<char>& vec){
-  for(const char& c : vec){
-    if(c=='#'){
+bool are_all_dots(const vector<char>& vec) {
+  for (const char& c : vec) {
+    if (c == '#') {
       return false;
     }
   }
   return true;
 }
-void change_vertical(vector<vector<char>>& all_numbers){
+void change_horizontal(vector<vector<char>>& all_numbers) {
   vector<size_t> positions;
-  vector<char> all_dots(all_numbers[0].size(),'.');
-  for(size_t i =0;i <all_numbers.size();++i){
-    if(are_all_dots(all_numbers[i])){
-      // positions.push_back(i);
-      all_numbers.insert(all_numbers.begin()+i,all_dots);
+  vector<char> all_dots(all_numbers[0].size(), '.');
+  for (size_t i = 0; i < all_numbers.size(); ++i) {
+    if (are_all_dots(all_numbers[i])) {
+      all_numbers.insert(all_numbers.begin() + i, all_dots);
       i++;
     }
   }
 }
 
 void insertColumn(std::vector<std::vector<char>>& vec, size_t columnIndex) {
-    for (size_t i = 0; i < vec.size(); ++i) {
-        vec[i].insert(vec[i].begin() + columnIndex, '.');
-    }
-}
-void change_horizontal(vector<vector<char>>& all_numbers){
-  vector<size_t> positions;
-  vector<char> all_dots(all_numbers.size(),'.');
-  for (size_t col = 0; col < all_numbers.size(); ++col) {
-    for (const auto& column: all_numbers[col]) {
-        if(are_all_dots(column)){
-          // positions.push_back(i);
-          insertColumn(all_numbers,col);
-          col++;
-    }
-    }
-   
+  for (size_t i = 0; i < vec.size(); ++i) {
+    vec[i].insert(vec[i].begin() + columnIndex, '.');
+  }
 }
 
+void change_vertical(std::vector<std::vector<char>>& vec) {
+  int rows = vec.size();
+  int cols = vec[0].size();
+
+  for (int col = 0; col < vec[0].size(); ++col) {
+    bool allDots = true;
+
+    for (int row = 0; row < rows; ++row) {
+      if (vec[row][col] != '.') {
+        allDots = false;
+        break;
+      }
+    }
+
+    if (allDots) {
+      // Insert a column of stars before the current column
+      for (int row = 0; row < rows; ++row) {
+        vec[row].insert(vec[row].begin() + col, '.');
+      }
+      ++col;  // Move to the next column as we added a column of stars
+    }
+  }
 }
 void display2DVector(const std::vector<std::vector<char>>& vec) {
-    for (const auto& row : vec) {
-        for (char ch : row) {
-            std::cout << ch << " ";
-        }
-        std::cout << std::endl;
+  for (const auto& row : vec) {
+    for (char ch : row) {
+      std::cout << ch << " ";
     }
+    std::cout << std::endl;
+  }
 }
 int part1() {
   vector<vector<char>> all_numbers;
   read_elements(all_numbers);
   int64_t sum = 0;
-  // change_vertical(all_numbers);
-  display2DVector(all_numbers);
-  cout << "--------------------------------------------"<< endl;
+  change_vertical(all_numbers);
   change_horizontal(all_numbers);
-  display2DVector(all_numbers);
-  return 0;
-}
+  vector<pair<int64_t, int64_t>> coordinates;
+  for (int i = 0; i < all_numbers.size(); ++i) {
+    for (int j = 0; j < all_numbers[i].size(); ++j) {
+      if (all_numbers[i][j] == '#') {
+        coordinates.push_back({i, j});
+      }
+    }
+  }
 
+  for (int i = 0; i < coordinates.size() - 1; ++i) {
+    for (int j = i + 1; j < coordinates.size(); ++j) {
+      sum += abs(coordinates[i].first - coordinates[j].first) +
+             abs(coordinates[i].second - coordinates[j].second);
+    }
+  }
+  return sum;
+}
 
 int main() {
   cout << part1() << endl;
